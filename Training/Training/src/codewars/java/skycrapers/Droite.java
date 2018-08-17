@@ -1,6 +1,7 @@
 package codewars.java.skycrapers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -46,11 +47,19 @@ public class Droite {
 		int i = 0;
 		while (i < 6 && nbVueMax < nbVueNeed) {
 			int[] tab = getTab();
+			if(tab[i] != 0) {
+				i++;
+				continue;
+			}
+			System.out.println("\t[Doite.removeImpossibleValues()] tab avant:"+ Arrays.toString(tab));
 			tab[i] = value;
+			System.out.println("\t[Doite.removeImpossibleValues()] test:"+ Arrays.toString(tab));
 			List<Integer> possibleValues = new ArrayList<>(trait.values);
 			possibleValues.remove(new Integer(value));
 			fillForMaxVue(tab, possibleValues);
+			System.out.println("\t[Doite.removeImpossibleValues()] fillForMaxVue:"+ Arrays.toString(tab));
 			nbVueMax = calculNbVue(tab);
+			System.out.println("\t[Doite.removeImpossibleValues()] nbVueMax:"+ nbVueMax);
 			if (nbVueMax < nbVueNeed) {
 				Case cases = trait.getCases(i, this);
 				System.out.println("\t[Doite.calcul()]Je ne peux pas mettre la valeur " + value + " dans la case " + cases);
@@ -63,6 +72,8 @@ public class Droite {
 	}
 
 	private void fillForMaxVue(int[] tab, List<Integer> possibleValues) {
+		if(possibleValues.isEmpty())
+			return;
 		int maxPossibleValues = Collections.max(possibleValues);
 		List<Integer> notPossibleValues = new ArrayList<Integer>();
 		notPossibleValues.add(1);
@@ -71,17 +82,30 @@ public class Droite {
 		notPossibleValues.add(4);
 		notPossibleValues.add(5);
 		notPossibleValues.add(6);
-		notPossibleValues.remove(possibleValues);
+		notPossibleValues.removeAll(possibleValues);
 		int maxDansTabRestant = Collections.max(notPossibleValues);
 		for (int i = 5; i >= 0; i--) {
 			if (maxDansTabRestant > maxPossibleValues && tab[i] != maxDansTabRestant) {
+				notPossibleValues.remove(new Integer(tab[i]));
+				if(notPossibleValues.isEmpty()) {
+					maxDansTabRestant = Integer.MIN_VALUE;
+					continue;
+				}
 				continue;
 			} else if (tab[i] == maxDansTabRestant) {
 				notPossibleValues.remove(new Integer(maxDansTabRestant));
+				if(notPossibleValues.isEmpty()) {
+					maxDansTabRestant = Integer.MIN_VALUE;
+					continue;
+				}
 				maxDansTabRestant = Collections.max(notPossibleValues);
 			} else if (maxPossibleValues > maxDansTabRestant && tab[i] == 0) {
 				tab[i] = maxPossibleValues;
-				possibleValues.remove(new Integer(maxDansTabRestant));
+				possibleValues.remove(new Integer(tab[i]));
+				if(possibleValues.isEmpty()) {
+					maxPossibleValues = Integer.MIN_VALUE;
+					continue;
+				}
 				maxPossibleValues = Collections.max(possibleValues);
 			}
 		}
