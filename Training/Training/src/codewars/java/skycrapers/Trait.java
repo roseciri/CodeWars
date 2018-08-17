@@ -7,18 +7,18 @@ import java.util.Map;
 
 public class Trait {
 
-	Droite droite1;
-	Droite droite2;
+	Droite positive;
+	Droite negative;
 	
 	List<Integer> values;
-	public List<Case> cases = new ArrayList<>();
+	private List<Case> cases = new ArrayList<>();
 	
-	public Trait(Droite droite1, Droite droite2) {
+	public Trait(Droite positive, Droite negative) {
 		super();
-		this.droite1 = droite1;
-		droite1.setTrait(this);
-		this.droite2 = droite2;
-		droite2.setTrait(this);
+		this.positive = positive;
+		positive.setTrait(this);
+		this.negative = negative;
+		negative.setTrait(this);
 		values = new ArrayList<>();
 		values.add(1);
 		values.add(2);
@@ -33,14 +33,15 @@ public class Trait {
 	}
 	
 	public void valueIsAdded(Case c, int v) {
+		System.out.println("\tUne valeur a été ajouté sur le trait "+this);
 		for (Case caseItem : cases) {
 			if (c != caseItem) {
 				caseItem.removeValue(v, this);
 			}
 		}
 		values.remove(new Integer(v));
-		droite1.calculNbVue();
-		droite2.calculNbVue();
+		positive.calculNbVue();
+		negative.calculNbVue();
 		setOrphelin();
 	}
 	
@@ -65,8 +66,29 @@ public class Trait {
 		for (Map.Entry<Integer, List<Case>> entry : nbByNumber.entrySet()) {
 			List<Case> cases = entry.getValue();
 			if (cases.size() == 1) {
+				System.out.println("\tLa valeur "+entry.getKey()+" ne peut pas être que sur la case "+cases.get(0));
 				cases.get(0).setValue(entry.getKey());
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		if(positive instanceof Ligne)
+			return "Horizontal ["+Math.abs( positive.numero)+"]";
+		else
+			return "Vertical ["+Math.abs( positive.numero)+"]";
+	}
+
+	public Case getCases(int i, Droite droite) {
+		if(droite == positive) {
+			return cases.get(i);
+		} else {
+			return cases.get(5-i);
+		}
+	}
+
+	public List<Case> getCases() {
+		return cases;
 	}
 }

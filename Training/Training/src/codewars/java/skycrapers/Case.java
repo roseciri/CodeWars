@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Case {
 	
-	public int value;
+	public int value = Integer.MAX_VALUE;
 	Trait trait1,  trait2;
 	
 	public List<Integer> possibleValue = new ArrayList<>();
@@ -24,6 +24,7 @@ public class Case {
 	public void setValue(int v) {
 		value = v;
 		possibleValue = null;
+		System.out.println("\tJe mets la valeur "+v+" sur la case "+this);
 		trait1.valueIsAdded(this, v);
 		trait2.valueIsAdded(this, v);
 	}
@@ -44,7 +45,7 @@ public class Case {
 
 	
 	public void print() {
-		if(value == 0) {
+		if(value == Integer.MAX_VALUE) {
 			for (int i = 1; i <7; i++) {
 				if(possibleValue.contains(Integer.valueOf(i))) {
 					System.out.print(i);
