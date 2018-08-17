@@ -3,6 +3,7 @@ package codewars.java.skycrapers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -24,11 +25,20 @@ public class Droite {
 	}
 
 	private void calcul() {
-			List<Integer> values = trait.values;
-			for (Integer v : new ArrayList<>(values)) {
+		List<Integer> values = trait.values;
+		values = new ArrayList<>(values);
+		Collections.reverse(values);
+		values.forEach(new Consumer<Integer>() {
+			@Override
+			public void accept(Integer v) {
 				removeImpossibleValues(v);
+				// System.out.println("\t[Doite.calcul()] Recherche des orhpelins sur la grille");
+				// grille.print();
+				trait.setOrphelin();
+
 			}
-			trait.setOrphelin();
+		});
+
 	}
 
 	private void removeImpossibleValues(int value) {
@@ -37,9 +47,11 @@ public class Droite {
 		while (i < 6 && nbVueMax < nbVueNeed) {
 			int[] tab = getTab();
 			tab[i] = value;
-			fillForMaxVue(tab);
+			List<Integer> possibleValues = new ArrayList<>(trait.values);
+			possibleValues.remove(new Integer(value));
+			fillForMaxVue(tab, possibleValues);
 			nbVueMax = calculNbVue(tab);
-			if(nbVueMax < nbVueNeed) {
+			if (nbVueMax < nbVueNeed) {
 				Case cases = trait.getCases(i, this);
 				System.out.println("\t[Doite.calcul()]Je ne peux pas mettre la valeur " + value + " dans la case " + cases);
 				cases.removeValue(value, trait);
@@ -50,48 +62,46 @@ public class Droite {
 		}
 	}
 
-	private void fillForMaxVue(int[] tab) {
-		int maxTemp = 0;
-		List<Integer> possibleValues = new ArrayList<>(trait.values);
-		for(int i = 5 ; i >= 0 ; i-- ) {
-			if(possibleValues.contains(6)) {
-				tab[i] = 6;
-				maxTemp = 6;
-				possibleValues.remove(new Integer(6));
+	private void fillForMaxVue(int[] tab, List<Integer> possibleValues) {
+		int maxPossibleValues = Collections.max(possibleValues);
+		List<Integer> notPossibleValues = new ArrayList<Integer>();
+		notPossibleValues.add(1);
+		notPossibleValues.add(2);
+		notPossibleValues.add(3);
+		notPossibleValues.add(4);
+		notPossibleValues.add(5);
+		notPossibleValues.add(6);
+		notPossibleValues.remove(possibleValues);
+		int maxDansTabRestant = Collections.max(notPossibleValues);
+		for (int i = 5; i >= 0; i--) {
+			if (maxDansTabRestant > maxPossibleValues && tab[i] != maxDansTabRestant) {
 				continue;
-			} else if(tab[i] == 6) {
-				maxTemp = 6;
-				continue;
-			} else if(maxTemp == 0) {
-				continue;
-			}
-			if(tab[i] == 0) {
-				tab[i] = getMaxPossibleValue(maxTemp , possibleValues, i);
-				maxTemp = tab[i];
-				possibleValues.remove(new Integer(maxTemp));
-			} else {
-				maxTemp = Math.min(maxTemp, tab[i]);
+			} else if (tab[i] == maxDansTabRestant) {
+				notPossibleValues.remove(new Integer(maxDansTabRestant));
+				maxDansTabRestant = Collections.max(notPossibleValues);
+			} else if (maxPossibleValues > maxDansTabRestant && tab[i] == 0) {
+				tab[i] = maxPossibleValues;
+				possibleValues.remove(new Integer(maxDansTabRestant));
+				maxPossibleValues = Collections.max(possibleValues);
 			}
 		}
-		
+
 	}
 
 	private int getMaxPossibleValue(int maxTemp, List<Integer> possibleValues, int indexCase) {
 		final Droite d = this;
-		List<Integer> intersect = possibleValues.stream()
-			    .filter(new Predicate<Integer>() {
+		List<Integer> intersect = possibleValues.stream().filter(new Predicate<Integer>() {
 
-					@Override
-					public boolean test(Integer t) {
-						if(t >= maxTemp)
-							return false;
-						if(trait.getCases(indexCase, d).possibleValue != null)
-							return trait.getCases(indexCase, d).possibleValue.contains(t);
-						return false;
-					}
-				})
-			    .collect(Collectors.toList());
-		if(intersect.isEmpty())
+			@Override
+			public boolean test(Integer t) {
+				if (t >= maxTemp)
+					return false;
+				if (trait.getCases(indexCase, d).possibleValue != null)
+					return trait.getCases(indexCase, d).possibleValue.contains(t);
+				return false;
+			}
+		}).collect(Collectors.toList());
+		if (intersect.isEmpty())
 			return 0;
 		return Collections.max(intersect);
 	}
@@ -105,17 +115,16 @@ public class Droite {
 	}
 
 	void calculNbVue() {
-		System.out.println(
-				"\t[Doite.calculNbVue()]" + this + "calcule le nb de vue");
+		System.out.println("\t[Doite.calculNbVue()]" + this + "calcule le nb de vue");
 		int nbVueTemp = calculNbVue(getTab());
-		if (nbVueTemp != nbVue) {	
+		if (nbVueTemp != nbVue) {
 			nbVue = nbVueTemp;
 			System.out.println(
 					"\t[Doite.calculNbVue()]" + this + " mets à jour le nombre de vue " + nbVue + " et je remets a jour les valeurs possible");
 			calcul();
 		}
 	}
-	
+
 	private int[] getTab() {
 		int[] tab = new int[6];
 		for (int i = 0; i < tab.length; i++) {
@@ -136,8 +145,6 @@ public class Droite {
 		}
 		return nbVueTemp;
 	}
-	
-
 
 	public Trait getTrait() {
 		return trait;
