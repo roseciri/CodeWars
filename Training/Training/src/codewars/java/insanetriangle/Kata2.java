@@ -1,24 +1,45 @@
 package codewars.java.insanetriangle;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Kata2 {
 	
 	public static void main(String[] args) {
-		System.out.println( getTriangleSolution("RBRGBRBGGRRRBG"));
+		List<Integer> triangleTailles = new ArrayList<>();
+		triangleTailles.add(0);
+		System.out.println(getTriangleSolution("RBRGBRBGGRRRBGBBBGGB", triangleTailles, "RBRGBRBGGRRRBGBBBGGB".length()));
 	}
 
-
-	private static String getTriangleSolution(String chaine) {
-		System.out.println(chaine);
-		int taillePlusGrandTriangle = getTaillePlusGrandTriangle(chaine.length());
-		if(taillePlusGrandTriangle == chaine.length()) {
-			return String.valueOf((char) triangle[chaine.charAt(0)][chaine.charAt(chaine.length()-1)]) ;
+	private static String getTriangleSolution(String chaine, List<Integer> triangleTaille, int sizeNewChaine) {
+		if(sizeNewChaine == 1) {
+			System.out.println(triangleTaille);
+			return String.valueOf((char) getValue(0,  chaine, triangleTaille, triangleTaille.size() - 1)) ;
+		} else {
+			int taillePlusGrandTriangle = getTaillePlusGrandTriangle(sizeNewChaine);
+			triangleTaille.add(taillePlusGrandTriangle);
+			return getTriangleSolution(chaine, triangleTaille, sizeNewChaine - (taillePlusGrandTriangle - 1));
 		}
-		int chaineTaille = chaine.length() - taillePlusGrandTriangle + 1;
-		int frequence = getTaillePlusGrandTriangle(chaineTaille);
-		String newChaine = calculNewChaine(chaine, taillePlusGrandTriangle, frequence);
-		return getTriangleSolution(newChaine);
+	}
+	
+	private static char getValue(int index,  String chaine, List<Integer> triangleTailles, int indexTaille) {
+		int niveau =  triangleTailles.size() - indexTaille ;
+		StringBuilder tab = new StringBuilder();
+		for (int i = 0; i < niveau; i++) {
+			tab.append("\t");
+		}
+		
+		System.out.println(tab.toString()+"index : "+ index + "/"+niveau+", taille de mon triangle à parti du niveau inféieur :"+ triangleTailles.get(indexTaille));
+		int triangleTaille = triangleTailles.get(indexTaille);
+		if(triangleTaille == 0) {
+			System.out.println((tab.toString()+"je vais chercher dans ma chaine initiale : "+chaine.charAt(index)));
+			return chaine.charAt(index);
+		}
+		char debut = getValue(index,  chaine,  triangleTailles, indexTaille-1);
+		char fin = getValue(index + (triangleTaille-1),  chaine,  triangleTailles, indexTaille-1); 
+		System.out.println((tab.toString()+"value : "+(char) triangle[debut][fin]));
+		return (char) triangle[debut][fin];
 	}
 
 	static private byte[][] triangle = new byte[83][83];
@@ -41,17 +62,6 @@ public class Kata2 {
 		triangle[vert][bleu] = rouge;
 	};
 
-	private static String calculNewChaine(String chaine, int taillePlusGrandTriangle, int frequence) {
-		StringBuilder result = new StringBuilder();
-		int debut = 0;
-		int fin = taillePlusGrandTriangle-1;
-		while(fin <= chaine.length()-1) {
-			result.append((char) triangle[chaine.charAt(debut)][chaine.charAt(fin)]); 
-			debut += frequence -1;
-			fin += frequence - 1;
-		}
-		return result.toString();
-	}
 
 	private static int getTaillePlusGrandTriangle(int chaineTaille) {
 		return new BigDecimal(3).pow(getExposant(chaineTaille)).add(BigDecimal.ONE).intValueExact();
