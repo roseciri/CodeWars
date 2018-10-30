@@ -3,13 +3,38 @@ package codewars.java.insanetriangle;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Kata2 {
 	
 	public static void main(String[] args) {
 		List<Integer> triangleTailles = new ArrayList<>();
 		triangleTailles.add(0);
-		System.out.println(getTriangleSolution("RBRGBRBGGRRRBGBBBGGB", triangleTailles, "RBRGBRBGGRRRBGBBBGGB".length()));
+		StringBuilder chaine = new StringBuilder();
+		for (int i = 0; i <= 10000000; i++) {
+			int v= ((int)(Math.random()*100000))%3;
+			switch (v) {
+			case 0:
+				chaine.append("R");
+				break;
+			case 1:
+				chaine.append("G");
+				break;
+			case 2:
+				chaine.append("B");
+				break;
+			}
+		}
+		SortedSet<BigDecimal> values = new TreeSet<BigDecimal>();
+		for (int i = 0; i <= 20; i++) {
+			//values.add(new BigDecimal(9).pow(i).add(BigDecimal.ONE));
+			values.add(new BigDecimal(3).pow(i).add(BigDecimal.ONE));
+			//values.add(new BigDecimal(10).pow(i).add(BigDecimal.ONE));
+		}
+		System.out.println(values);
+		
+		System.out.println(getTriangleSolution(chaine.toString(), triangleTailles, chaine.length()));
 	}
 
 	private static String getTriangleSolution(String chaine, List<Integer> triangleTaille, int sizeNewChaine) {
